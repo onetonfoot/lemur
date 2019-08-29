@@ -58,6 +58,10 @@ impl Interpreter {
                     Object::Bool(false) => self.eval(&node.tail[2]),
                     o => panic!("Non boolean value given to if statement {:?}", o),
                 },
+                Atom::Equal => Object::Bool(self.eval(&node.tail[0]) == self.eval(&node.tail[1])),
+                Atom::NotEqual => {
+                    Object::Bool(self.eval(&node.tail[0]) != self.eval(&node.tail[1]))
+                }
                 op => panic!("Unknown operation {:?}", op),
             },
             AST::Atom(atom) => match atom {
@@ -116,7 +120,9 @@ mod tests {
     fn setup(s: &str) -> (Interpreter, AST) {
         //Stage 1
         let tokens = tokenize(s).expect("Setup failed to tokenize the string");
-        let lexer = Lexer::new(tokens);
+        println!("TOKENS {:?}", tokens);
+        let mut lexer = Lexer::new(tokens);
+        println!("LEXED {:?}", lexer.all());
         //Stage 2
         let mut parser = Parser::new(lexer);
         let ast = parser.parse();
@@ -173,6 +179,32 @@ mod tests {
         let res = interpreter.eval(&ast);
         let ans = Object::Bool(false);
         assert_eq!(&res, &ans);
+    }
+
+    #[test]
+    fn equals() {
+        let (mut interpreter, ast) = setup("5 == 10");
+        let res = interpreter.eval(&ast);
+        let ans = Object::Bool(false);
+        assert_eq!(&res, &ans);
+
+        let (mut interpreter, ast) = setup("5 == 5");
+        let res = interpreter.eval(&ast);
+        let ans = Object::Bool(true);
+        assert_eq!(&res, &ans);
+    }
+
+    #[test]
+    fn not_equals() {
+        let (mut interpreter, ast) = setup("5 != 5");
+        let res = interpreter.eval(&ast);
+        let ans = Object::Bool(false);
+        assert_eq!(&res, &ans);
+
+        // let (mut interpreter, ast) = setup("5 != 10");
+        // let res = interpreter.eval(&ast);
+        // let ans = Object::Bool(true);
+        // assert_eq!(&res, &ans);
     }
 
     #[test]

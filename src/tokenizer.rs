@@ -7,7 +7,6 @@ pub enum Error {
     UnknownChar(char),
 }
 
-//This should keep whitespace!
 pub fn tokenize(s: &str) -> Result<Vec<String>> {
     let mut idx = 0;
     let mut tokens = vec![];
@@ -17,7 +16,22 @@ pub fn tokenize(s: &str) -> Result<Vec<String>> {
     while idx < chars.len() {
         match chars[idx] {
             c if "<>[]{}(),:+*/&|!%$@=^".contains(c as char) => {
-                tokens.push((c as char).to_string());
+                let cur_char = c as char;
+
+                if idx + 1 < chars.len() {
+                    let next_char = chars[idx + 1] as char;
+                    let both = format!("{}{}", cur_char, next_char);
+                    match both.as_ref() {
+                        "!=" | "==" => {
+                            idx += 1;
+                            tokens.push(both);
+                        }
+                        _ => tokens.push(cur_char.to_string()),
+                    };
+                } else {
+                    tokens.push(cur_char.to_string());
+                }
+
                 idx += 1;
             }
             c if (c as char).is_numeric() => {
@@ -47,9 +61,9 @@ pub fn tokenize(s: &str) -> Result<Vec<String>> {
                 tokens.push(String::from_utf8(token).expect("Failed to create utf8 string"));
             }
             c if (c as char).is_whitespace() => {
-                if c == ('\n' as u8) {
-                    tokens.push((c as char).to_string());
-                }
+                // if c == ('\n' as u8) {
+                //     tokens.push((c as char).to_string());
+                // }
                 idx += 1;
             }
             c => return Err(Error::UnknownChar(c as char)),
@@ -85,6 +99,13 @@ mod tests {
     }
 
     #[test]
+    fn equals_token() {
+        let tokens = tokenize("x == y").unwrap();
+        let ans: Vec<String> = vec!["x", "==", "y"].iter().map(|s| s.to_string()).collect();
+        assert_eq!(tokens, ans);
+    }
+
+    #[test]
     fn whitespace() {
         let s = indoc!(
             "
@@ -93,7 +114,8 @@ mod tests {
         "
         );
         let tokens = tokenize(s).unwrap();
-        let ans: Vec<String> = vec!["if", "x", ">", "y", "then", "\n", "5"]
+        // let ans: Vec<String> = vec!["if", "x", ">", "y", "then", "\n", "5"]
+        let ans: Vec<String> = vec!["if", "x", ">", "y", "then", "5"]
             .iter()
             .map(|s| s.to_string())
             .collect();

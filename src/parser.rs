@@ -33,7 +33,6 @@ impl Parser {
                 self.lexer.expect(&Token::Then);
                 let block = self.parse_block();
                 let next_token = self.lexer.peek(0);
-                println!("Next token {:?}", next_token);
 
                 match next_token {
                     Token::End => {
@@ -76,7 +75,6 @@ impl Parser {
                 self.lexer.expect(&Token::End);
                 ast
             }
-            // Token::End => AST::Atom(Atom::Nothing),
             Token::Symbol(value) => AST::Atom(Atom::Symbol(value)),
             _ => panic!("The token {:?} doesn't have a nud", token),
         }
@@ -90,7 +88,9 @@ impl Parser {
             | Token::Multiply
             | Token::Assign
             | Token::GreaterThan
-            | Token::LessThan => {
+            | Token::LessThan
+            | Token::Equal
+            | Token::NotEqual => {
                 let right = self._parse(token.precedence());
                 let head = token.to_atom();
                 let node = Node {
@@ -117,7 +117,6 @@ impl Parser {
         let mut tail = vec![];
 
         loop {
-            // println!(self.lexer.e)
             match self.lexer.peek(0) {
                 Token::EOF | Token::End | Token::Else | Token::ElseIf => break,
                 _ => (),
@@ -237,6 +236,44 @@ mod tests {
         let result = parser.parse();
         let ans = AST::Node(Node {
             head: Atom::Assign,
+            tail: vec![
+                AST::Atom(Atom::Symbol("x".to_string())),
+                AST::Atom(Atom::Float(10.0)),
+            ],
+        });
+
+        assert_eq!(result, ans);
+    }
+
+    #[test]
+    fn equals() {
+        let tokens = tokenize("x == 10").unwrap();
+        let mut lexer = Lexer::new(tokens);
+        println!("LEXER: {:?}", lexer.all());
+        let mut parser = Parser::new(lexer);
+
+        let result = parser.parse();
+        let ans = AST::Node(Node {
+            head: Atom::Equal,
+            tail: vec![
+                AST::Atom(Atom::Symbol("x".to_string())),
+                AST::Atom(Atom::Float(10.0)),
+            ],
+        });
+
+        assert_eq!(result, ans);
+    }
+
+    // #[ignore]
+    #[test]
+    fn not_equals() {
+        let tokens = tokenize("x != 10").unwrap();
+        let mut lexer = Lexer::new(tokens);
+        let mut parser = Parser::new(lexer);
+
+        let result = parser.parse();
+        let ans = AST::Node(Node {
+            head: Atom::NotEqual,
             tail: vec![
                 AST::Atom(Atom::Symbol("x".to_string())),
                 AST::Atom(Atom::Float(10.0)),

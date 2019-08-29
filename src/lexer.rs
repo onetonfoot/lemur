@@ -62,12 +62,10 @@ impl Token {
 
     pub fn precedence(&self) -> isize {
         match self {
-            Self::GreaterThan => 10,
-            Self::LessThan => 10,
-            Self::Plus => 20,
-            Self::Minus => 20,
-            Self::Multiply => 30,
-            Self::Divide => 30,
+            Self::Equal | Self::NotEqual => 5,
+            Self::GreaterThan | Self::LessThan => 10,
+            Self::Plus | Self::Minus => 20,
+            Self::Multiply | Self::Divide => 30,
             Self::Power => 40,
             Self::Assign => 50,
             _ => 0,
@@ -86,44 +84,14 @@ impl Lexer {
     }
 
     pub fn next(&mut self) -> Token {
-        if self.idx < self.tokens.len() {
-            let token = str_to_token(&self.tokens[self.idx]);
-
-            if token == Token::NewLine {
-                self.idx += 1;
-                return self.next();
-            }
-
-            let next_token = self.peek(1);
-
-            match (&token, &next_token) {
-                (Token::Assign, Token::Assign) => {
-                    self.idx += 2;
-                    Token::Equal
-                }
-                (Token::Not, Token::Assign) => {
-                    self.idx += 2;
-                    Token::NotEqual
-                }
-                _ => {
-                    self.idx += 1;
-                    token
-                }
-            }
-        } else {
-            Token::EOF
-        }
+        let token = self.peek(0);
+        self.idx += 1;
+        token
     }
 
-    pub fn peek(&self, n: usize) -> Token {
+    pub fn peek(&mut self, n: usize) -> Token {
         if self.idx + n < self.tokens.len() {
-            let token = str_to_token(&self.tokens[self.idx + n]);
-
-            if token == Token::NewLine {
-                return self.peek(n + 1);
-            } else {
-                token
-            }
+            str_to_token(&self.tokens[self.idx + n])
         } else {
             Token::EOF
         }
@@ -145,6 +113,7 @@ impl Lexer {
         while self.peek(0) != Token::EOF {
             tokens.push(self.next())
         }
+        self.idx = 0;
         tokens
     }
 }
@@ -163,6 +132,8 @@ fn str_to_token(token: &str) -> Token {
         ">" => Token::GreaterThan,
         //Assignemnt
         "=" => Token::Assign,
+        "!=" => Token::NotEqual,
+        "==" => Token::Equal,
         //Brackets
         "(" => Token::LParen,
         ")" => Token::RParen,
@@ -231,8 +202,9 @@ mod tests {
         assert_eq!(ans, tokens);
     }
 
+    // #[ignore]
     #[test]
-    fn equals() {
+    fn doesnt_equal() {
         let tokens = setup("x != y");
         let ans = vec![
             Token::Symbol("x".to_string()),

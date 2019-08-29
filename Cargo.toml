@@ -1,0 +1,17 @@
+[package]
+name = "lemur"
+version = "0.1.0"
+authors = ["onetonfoot <onetonfoot@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+indoc = "0.3"
+
+
+[lib]
+name = "lemurlib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lemur"
+path = "src/main.rs"

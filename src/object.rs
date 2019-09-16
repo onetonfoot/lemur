@@ -8,9 +8,3 @@ pub enum Object {
     Bool(bool),
     Nothing,
 }
-
-// impl fmt::Display for Object {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         Object
-//     }
-// }

@@ -264,11 +264,10 @@ mod tests {
         assert_eq!(result, ans);
     }
 
-    // #[ignore]
     #[test]
     fn not_equals() {
         let tokens = tokenize("x != 10").unwrap();
-        let mut lexer = Lexer::new(tokens);
+        let lexer = Lexer::new(tokens);
         let mut parser = Parser::new(lexer);
 
         let result = parser.parse();

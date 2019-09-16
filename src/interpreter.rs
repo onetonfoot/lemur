@@ -201,10 +201,10 @@ mod tests {
         let ans = Object::Bool(false);
         assert_eq!(&res, &ans);
 
-        // let (mut interpreter, ast) = setup("5 != 10");
-        // let res = interpreter.eval(&ast);
-        // let ans = Object::Bool(true);
-        // assert_eq!(&res, &ans);
+        let (mut interpreter, ast) = setup("5 != 10");
+        let res = interpreter.eval(&ast);
+        let ans = Object::Bool(true);
+        assert_eq!(&res, &ans);
     }
 
     #[test]

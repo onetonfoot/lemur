@@ -44,7 +44,6 @@ pub fn tokenize(s: &str) -> Result<Vec<String>> {
                         break;
                     }
                 }
-                //All of this parsing
                 let number = String::from_utf8(token).expect("Failed to create utf8 string");
                 tokens.push(number);
             }
@@ -61,9 +60,6 @@ pub fn tokenize(s: &str) -> Result<Vec<String>> {
                 tokens.push(String::from_utf8(token).expect("Failed to create utf8 string"));
             }
             c if (c as char).is_whitespace() => {
-                // if c == ('\n' as u8) {
-                //     tokens.push((c as char).to_string());
-                // }
                 idx += 1;
             }
             c => return Err(Error::UnknownChar(c as char)),
@@ -114,7 +110,6 @@ mod tests {
         "
         );
         let tokens = tokenize(s).unwrap();
-        // let ans: Vec<String> = vec!["if", "x", ">", "y", "then", "\n", "5"]
         let ans: Vec<String> = vec!["if", "x", ">", "y", "then", "5"]
             .iter()
             .map(|s| s.to_string())
